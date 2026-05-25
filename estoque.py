@@ -102,9 +102,10 @@ alertar_estoque_baixo(20)
 
 janela = Tk()
 janela.title("Sistema de Controle de Estoque")
+janela.geometry("400x400")
 
 texto_orientacao = Label(janela, text="Bem-vindo ao Sistema de Controle de Estoque!")
-texto_orientacao.grid(column=0, row=0)
+texto_orientacao.grid(column=0, row=0, padx=70)
 botao = Button(janela, text="Clique aqui para ver o estoque", command= mostrar_estoque)
 botao.grid(column=0, row=1)
 texto_estoque = Label(janela, text="")
