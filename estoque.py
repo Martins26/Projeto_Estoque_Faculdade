@@ -37,8 +37,20 @@ def registrar_saida(produto_id, quantidade):
         print("Produto não encontrado")
 
 
-def consultar_estoque(produto_id):
-    if produto_id in estoque:
+def consultar_estoque(produto_id=None):
+    if produto_id is None:
+        texto = ""
+        for pid, info in estoque.items():
+            texto += (
+                f"ID: {pid}\n"
+                f"Nome: {info['nome']}\n"
+                f"Categoria: {info['categoria']}\n"
+                f"Preço: R$ {info['preco']}\n"
+                f"Quantidade: {info['quantidade']}\n"
+                "------------------------\n"
+            )
+        return texto
+    elif produto_id in estoque:
         produto = estoque[produto_id]
         texto = (
             f"Nome: {produto['nome']}\n"
@@ -54,18 +66,27 @@ def consultar_estoque(produto_id):
 
 
 def alertar_estoque_baixo(limite):
-    print("\n=== ALERTA DE ESTOQUE BAIXO ===")
+    mensagem = "=== ALERTA DE ESTOQUE BAIXO ===\n"
+    encontrou = False
 
     for produto_id, informacoes in estoque.items():
         if informacoes["quantidade"] < limite:
-            print(
-                f"O item {informacoes['nome']} "
+
+            mensagem += (
+                f"{informacoes['nome']} "
                 f"(ID: {produto_id}) tem apenas "
-                f"{informacoes['quantidade']} unidades"
+                f"{informacoes['quantidade']} unidades\n"
             )
 
+            encontrou = True
+
+    if not encontrou:
+        mensagem += "Nenhum produto com estoque baixo"
+
+    return mensagem
+
 def mostrar_estoque():
-    texto_estoque["text"] = consultar_estoque(1)
+    texto_estoque["text"] = consultar_estoque()
 
 
 cadastrar_produtos(3, "Cenoura", "verdura", 3.50, 15)
@@ -74,7 +95,7 @@ registrar_entrada(3, 15)
 
 registrar_saida(3, 5)
 
-consultar_estoque(1)
+consultar_estoque()
 
 alertar_estoque_baixo(20)
 
@@ -88,5 +109,8 @@ botao = Button(janela, text="Clique aqui para ver o estoque", command= mostrar_e
 botao.grid(column=0, row=1)
 texto_estoque = Label(janela, text="")
 texto_estoque.grid(column=0, row=2)
+texto_alerta = Label(janela, text=alertar_estoque_baixo(20))
+texto_alerta.grid(column=0, row=3)
+
 
 janela.mainloop()
