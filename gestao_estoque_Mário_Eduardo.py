@@ -8,6 +8,7 @@ estoque = {
 
 
 def cadastrar_produtos(produto_id, nome, categoria, preco, quantidade):
+    """Registra novo produto no sistema"""
 
     produtos = {
         "Nome": nome,
@@ -27,6 +28,7 @@ def cadastrar_produtos(produto_id, nome, categoria, preco, quantidade):
 
 
 def registrar_entrada(produto_id, quantidade):
+    """Adiciona itens ao estoque"""
 
     if produto_id in estoque:
 
@@ -48,6 +50,7 @@ def registrar_entrada(produto_id, quantidade):
 
 
 def registrar_saida(produto_id, quantidade):
+    """Remove itens do estoque"""
 
     if produto_id in estoque:
 
@@ -78,6 +81,7 @@ def registrar_saida(produto_id, quantidade):
 
 
 def consultar_estoque(produto_id=None):
+    """Verifica saldo atual do produto"""
 
     if produto_id is None:
 
@@ -89,7 +93,7 @@ def consultar_estoque(produto_id=None):
                 f"ID: {pid}\n"
                 f"Nome: {info['Nome']}\n"
                 f"Categoria: {info['Categoria']}\n"
-                f"Preço: R$ {info['Preço']}\n"
+                f"Preço: R$ {info['Preço']:.2f}\n"
                 f"Quantidade: {info['Quantidade']}\n"
                 "------------------------\n"
             )
@@ -103,7 +107,7 @@ def consultar_estoque(produto_id=None):
         texto = (
             f"Nome: {produto['Nome']}\n"
             f"Categoria: {produto['Categoria']}\n"
-            f"Preço: R$ {produto['Preço']}\n"
+            f"Preço: R$ {produto['Preço']:.2f}\n"
             f"Quantidade: {produto['Quantidade']}"
         )
 
@@ -115,6 +119,7 @@ def consultar_estoque(produto_id=None):
 
 
 def alertar_estoque_baixo(limite):
+    """Identifica produtos com estoque crítico"""
 
     mensagem = "=== ALERTA DE ESTOQUE BAIXO ===\n"
 
@@ -183,6 +188,50 @@ def pegar_dados():
         )
 
 
+def pegar_entrada():
+
+    try:
+
+        produto_id = int(entry_mov_id.get())
+        quantidade = int(entry_mov_quantidade.get())
+
+        registrar_entrada(produto_id, quantidade)
+
+        mostrar_estoque()
+
+        entry_mov_id.delete(0, END)
+        entry_mov_quantidade.delete(0, END)
+
+    except:
+
+        messagebox.showerror(
+            "Erro",
+            "Digite valores válidos!"
+        )
+
+
+def pegar_saida():
+
+    try:
+
+        produto_id = int(entry_mov_id.get())
+        quantidade = int(entry_mov_quantidade.get())
+
+        registrar_saida(produto_id, quantidade)
+
+        mostrar_estoque()
+
+        entry_mov_id.delete(0, END)
+        entry_mov_quantidade.delete(0, END)
+
+    except:
+
+        messagebox.showerror(
+            "Erro",
+            "Digite valores válidos!"
+        )
+
+
 janela = Tk()
 janela.title("Sistema de Controle de Estoque")
 janela.geometry("1280x720")
@@ -223,6 +272,7 @@ def scroll_mouse(event):
         int(-1 * (event.delta / 120)),
         "units"
     )
+
 
 canvas.bind_all("<MouseWheel>", scroll_mouse)
 
@@ -367,6 +417,92 @@ botao_cadastrar.grid(
     pady=20
 )
 
+texto_movimentacao = Label(
+    scrollable_frame,
+    text="Registrar Entrada / Saída",
+    font=("Arial", 18)
+)
+
+texto_movimentacao.grid(
+    row=3,
+    column=0,
+    pady=20
+)
+
+frame_movimentacao = Frame(scrollable_frame)
+
+frame_movimentacao.grid(
+    row=4,
+    column=0,
+    pady=10
+)
+
+Label(
+    frame_movimentacao,
+    text="ID Produto:",
+    font=("Arial", 12)
+).grid(
+    row=0,
+    column=0,
+    pady=5,
+    sticky="w"
+)
+
+entry_mov_id = Entry(frame_movimentacao)
+
+entry_mov_id.grid(
+    row=0,
+    column=1,
+    padx=10
+)
+
+Label(
+    frame_movimentacao,
+    text="Quantidade:",
+    font=("Arial", 12)
+).grid(
+    row=1,
+    column=0,
+    pady=5,
+    sticky="w"
+)
+
+entry_mov_quantidade = Entry(frame_movimentacao)
+
+entry_mov_quantidade.grid(
+    row=1,
+    column=1,
+    padx=10
+)
+
+botao_entrada = Button(
+    frame_movimentacao,
+    text="Adicionar Estoque",
+    command=pegar_entrada,
+    bg="lightgreen"
+)
+
+botao_entrada.grid(
+    row=2,
+    column=0,
+    pady=15,
+    padx=10
+)
+
+botao_saida = Button(
+    frame_movimentacao,
+    text="Remover Estoque",
+    command=pegar_saida,
+    bg="#ff9999"
+)
+
+botao_saida.grid(
+    row=2,
+    column=1,
+    pady=15,
+    padx=10
+)
+
 botao_estoque = Button(
     scrollable_frame,
     text="Clique aqui para ver o estoque",
@@ -374,7 +510,7 @@ botao_estoque = Button(
 )
 
 botao_estoque.grid(
-    row=3,
+    row=5,
     column=0,
     pady=10
 )
@@ -387,7 +523,7 @@ texto_estoque = Label(
 )
 
 texto_estoque.grid(
-    row=4,
+    row=6,
     column=0,
     pady=20
 )
@@ -400,7 +536,7 @@ texto_alerta = Label(
 )
 
 texto_alerta.grid(
-    row=5,
+    row=7,
     column=0,
     pady=10
 )
