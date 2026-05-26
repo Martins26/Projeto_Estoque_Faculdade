@@ -8,6 +8,7 @@ estoque = {
 
 
 def cadastrar_produtos(produto_id, nome, categoria, preco, quantidade):
+
     produtos = {
         "Nome": nome,
         "Categoria": categoria,
@@ -16,35 +17,74 @@ def cadastrar_produtos(produto_id, nome, categoria, preco, quantidade):
     }
 
     estoque[produto_id] = produtos
+
+    atualizar_alerta()
+
     messagebox.showinfo(
-    "Produto cadastrado",
-    f"Produto {nome} cadastrado com sucesso!"
-)
+        "Produto cadastrado",
+        f"Produto {nome} cadastrado com sucesso!"
+    )
 
 
 def registrar_entrada(produto_id, quantidade):
+
     if produto_id in estoque:
+
         estoque[produto_id]["Quantidade"] += quantidade
-        messagebox.showinfo("Entrada Registrada", f"Adicionado {quantidade} unidades ao produto {estoque[produto_id]['Nome']}!")
+
+        atualizar_alerta()
+
+        messagebox.showinfo(
+            "Entrada Registrada",
+            f"Adicionado {quantidade} unidades ao produto {estoque[produto_id]['Nome']}!"
+        )
+
     else:
-        messagebox.showerror("Produto não encontrado", "O produto especificado não foi encontrado.")
+
+        messagebox.showerror(
+            "Produto não encontrado",
+            "O produto especificado não foi encontrado."
+        )
 
 
 def registrar_saida(produto_id, quantidade):
+
     if produto_id in estoque:
+
         if estoque[produto_id]["Quantidade"] >= quantidade:
+
             estoque[produto_id]["Quantidade"] -= quantidade
-            messagebox.showinfo("Saída Registrada", f"Removido {quantidade} unidades do produto {estoque[produto_id]['Nome']}!")
+
+            atualizar_alerta()
+
+            messagebox.showinfo(
+                "Saída Registrada",
+                f"Removido {quantidade} unidades do produto {estoque[produto_id]['Nome']}!"
+            )
+
         else:
-            messagebox.showerror("Quantidade insuficiente", "A quantidade solicitada não está disponível em estoque.")
+
+            messagebox.showerror(
+                "Quantidade insuficiente",
+                "A quantidade solicitada não está disponível em estoque."
+            )
+
     else:
-        messagebox.showerror("Produto não encontrado", "O produto especificado não foi encontrado.")
+
+        messagebox.showerror(
+            "Produto não encontrado",
+            "O produto especificado não foi encontrado."
+        )
 
 
 def consultar_estoque(produto_id=None):
+
     if produto_id is None:
+
         texto = ""
+
         for pid, info in estoque.items():
+
             texto += (
                 f"ID: {pid}\n"
                 f"Nome: {info['Nome']}\n"
@@ -53,9 +93,13 @@ def consultar_estoque(produto_id=None):
                 f"Quantidade: {info['Quantidade']}\n"
                 "------------------------\n"
             )
+
         return texto
+
     elif produto_id in estoque:
+
         produto = estoque[produto_id]
+
         texto = (
             f"Nome: {produto['Nome']}\n"
             f"Categoria: {produto['Categoria']}\n"
@@ -66,14 +110,18 @@ def consultar_estoque(produto_id=None):
         return texto
 
     else:
+
         return "Produto não encontrado"
 
 
 def alertar_estoque_baixo(limite):
+
     mensagem = "=== ALERTA DE ESTOQUE BAIXO ===\n"
+
     encontrou = False
 
     for produto_id, informacoes in estoque.items():
+
         if informacoes["Quantidade"] < limite:
 
             mensagem += (
@@ -85,86 +133,276 @@ def alertar_estoque_baixo(limite):
             encontrou = True
 
     if not encontrou:
+
         mensagem += "Nenhum produto com estoque baixo"
 
     return mensagem
 
+
+def atualizar_alerta():
+
+    texto_alerta["text"] = alertar_estoque_baixo(20)
+
+
 def mostrar_estoque():
+
     texto_estoque["text"] = consultar_estoque()
 
 
 def pegar_dados():
 
-    produto_id = int(entry_id.get())
-    nome = entry_nome.get()
-    categoria = entry_categoria.get()
-    preco = float(entry_preco.get())
-    quantidade = int(entry_quantidade.get())
+    try:
 
-    cadastrar_produtos(
-        produto_id,
-        nome,
-        categoria,
-        preco,
-        quantidade
-    )
+        produto_id = int(entry_id.get())
+        nome = entry_nome.get()
+        categoria = entry_categoria.get()
+        preco = float(entry_preco.get())
+        quantidade = int(entry_quantidade.get())
 
-    mostrar_estoque()
+        cadastrar_produtos(
+            produto_id,
+            nome,
+            categoria,
+            preco,
+            quantidade
+        )
 
+        mostrar_estoque()
 
-cadastrar_produtos(3, "Cenoura", "Verdura", 3.50, 15)
+        entry_id.delete(0, END)
+        entry_nome.delete(0, END)
+        entry_categoria.delete(0, END)
+        entry_preco.delete(0, END)
+        entry_quantidade.delete(0, END)
 
-registrar_entrada(3, 15)
+    except:
 
-registrar_saida(3, 5)
-
-consultar_estoque()
-
-alertar_estoque_baixo(20)
+        messagebox.showerror(
+            "Erro",
+            "Digite valores válidos!"
+        )
 
 
 janela = Tk()
 janela.title("Sistema de Controle de Estoque")
 janela.geometry("1280x720")
 
-texto_orientacao = Label(janela, text="Bem-vindo ao Sistema de Controle de Estoque!")
-texto_orientacao.grid(column=0, row=0, padx=70)
-texto_orientacao2 = Label(janela, text="Preencha as informações abaixo para cadastrar um novo produto:")
-texto_orientacao2.grid(column=0, row=1, padx=70)
-botao = Button(janela, text="Clique aqui para ver o estoque", command= mostrar_estoque)
-botao.grid(column=0, row=10, pady=10)
-texto_estoque = Label(janela, text="", justify=LEFT)
-texto_estoque.grid(column=1, row=2, columnspan=2)
-texto_alerta = Label(janela, text=alertar_estoque_baixo(20))
-texto_alerta.grid(column=0, row=11)
+canvas = Canvas(janela)
 
-Label(janela, text="ID").grid(column=0, row=4)
-entry_id = Entry(janela)
-entry_id.grid(column=1, row=4)
+scrollbar = Scrollbar(
+    janela,
+    orient=VERTICAL,
+    command=canvas.yview
+)
 
-Label(janela, text="Nome").grid(column=0, row=5)
-entry_nome = Entry(janela)
-entry_nome.grid(column=1, row=5)
+scrollable_frame = Frame(canvas)
 
-Label(janela, text="Categoria").grid(column=0, row=6)
-entry_categoria = Entry(janela)
-entry_categoria.grid(column=1, row=6)
+scrollable_frame.bind(
+    "<Configure>",
+    lambda e: canvas.configure(
+        scrollregion=canvas.bbox("all")
+    )
+)
 
-Label(janela, text="Preço").grid(column=0, row=7)
-entry_preco = Entry(janela)
-entry_preco.grid(column=1, row=7)
+canvas.create_window(
+    (0, 0),
+    window=scrollable_frame,
+    anchor="nw"
+)
 
-Label(janela, text="Quantidade").grid(column=0, row=8)
-entry_quantidade = Entry(janela)
-entry_quantidade.grid(column=1, row=8)
+canvas.configure(yscrollcommand=scrollbar.set)
+
+canvas.pack(side=LEFT, fill=BOTH, expand=True)
+
+scrollbar.pack(side=RIGHT, fill=Y)
+
+
+def scroll_mouse(event):
+
+    canvas.yview_scroll(
+        int(-1 * (event.delta / 120)),
+        "units"
+    )
+
+canvas.bind_all("<MouseWheel>", scroll_mouse)
+
+texto_orientacao = Label(
+    scrollable_frame,
+    text="Bem-vindo ao Sistema de Controle de Estoque!",
+    font=("Arial", 28)
+)
+
+texto_orientacao.grid(
+    row=0,
+    column=0,
+    pady=30,
+    padx=200
+)
+
+texto_orientacao2 = Label(
+    scrollable_frame,
+    text="Preencha as informações abaixo para cadastrar um novo produto:",
+    font=("Arial", 16)
+)
+
+texto_orientacao2.grid(
+    row=1,
+    column=0,
+    pady=10
+)
+
+frame_formulario = Frame(scrollable_frame)
+
+frame_formulario.grid(
+    row=2,
+    column=0,
+    pady=20
+)
+
+Label(
+    frame_formulario,
+    text="ID:",
+    font=("Arial", 12)
+).grid(
+    row=0,
+    column=0,
+    sticky="w",
+    pady=5
+)
+
+entry_id = Entry(frame_formulario)
+
+entry_id.grid(
+    row=0,
+    column=1,
+    padx=10
+)
+
+Label(
+    frame_formulario,
+    text="Nome:",
+    font=("Arial", 12)
+).grid(
+    row=1,
+    column=0,
+    sticky="w",
+    pady=5
+)
+
+entry_nome = Entry(frame_formulario)
+
+entry_nome.grid(
+    row=1,
+    column=1,
+    padx=10
+)
+
+Label(
+    frame_formulario,
+    text="Categoria:",
+    font=("Arial", 12)
+).grid(
+    row=2,
+    column=0,
+    sticky="w",
+    pady=5
+)
+
+entry_categoria = Entry(frame_formulario)
+
+entry_categoria.grid(
+    row=2,
+    column=1,
+    padx=10
+)
+
+Label(
+    frame_formulario,
+    text="Preço:",
+    font=("Arial", 12)
+).grid(
+    row=3,
+    column=0,
+    sticky="w",
+    pady=5
+)
+
+entry_preco = Entry(frame_formulario)
+
+entry_preco.grid(
+    row=3,
+    column=1,
+    padx=10
+)
+
+Label(
+    frame_formulario,
+    text="Quantidade:",
+    font=("Arial", 12)
+).grid(
+    row=4,
+    column=0,
+    sticky="w",
+    pady=5
+)
+
+entry_quantidade = Entry(frame_formulario)
+
+entry_quantidade.grid(
+    row=4,
+    column=1,
+    padx=10
+)
 
 botao_cadastrar = Button(
-    janela,
+    frame_formulario,
     text="Cadastrar Produto",
     command=pegar_dados
 )
 
-botao_cadastrar.grid(column=0, row=9)
+botao_cadastrar.grid(
+    row=5,
+    column=0,
+    columnspan=2,
+    pady=20
+)
 
+botao_estoque = Button(
+    scrollable_frame,
+    text="Clique aqui para ver o estoque",
+    command=mostrar_estoque
+)
+
+botao_estoque.grid(
+    row=3,
+    column=0,
+    pady=10
+)
+
+texto_estoque = Label(
+    scrollable_frame,
+    text="",
+    justify=LEFT,
+    font=("Arial", 11)
+)
+
+texto_estoque.grid(
+    row=4,
+    column=0,
+    pady=20
+)
+
+texto_alerta = Label(
+    scrollable_frame,
+    text=alertar_estoque_baixo(20),
+    font=("Arial", 11),
+    fg="red"
+)
+
+texto_alerta.grid(
+    row=5,
+    column=0,
+    pady=10
+)
 
 janela.mainloop()
